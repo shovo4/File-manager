@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import Modal from './modal.js';
 
 const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDelete, onCopy, onCut }) => {
   const [editContent, setEditContent] = useState(content);
@@ -16,7 +17,7 @@ const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDel
 
   const handleRename = () => {
     onRename(name, newName);
-    setIsRenaming(false);
+    setIsRenaming(false);w
   };
 
   return (
@@ -136,6 +137,8 @@ function App() {
     JSON.parse(localStorage.getItem('clipboard')) || null
   );
   const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
 
   useEffect(() => {
     localStorage.setItem('fileSystem', JSON.stringify(fileSystem));
@@ -144,17 +147,16 @@ function App() {
   useEffect(() => {
     localStorage.setItem('clipboard', JSON.stringify(clipboard));
   }, [clipboard]);
-  
-  const addNewItem = (isFolder) => {
+
+  const addNewItem = (isFolder, itemName) => {
     const newFileSystem = { ...fileSystem };
-    if (newFileSystem[newItemName]) {
+    if (newFileSystem[itemName]) {
       alert('A file or folder with this name already exists.');
       return;
     }
     const content = isFolder ? {} : 'New content';
-    newFileSystem[newItemName] = content;
+    newFileSystem[itemName] = content;
     setFileSystem(newFileSystem);
-    setNewItemName('');
   };
 
   const updateFileContent = (fileName, content) => {
@@ -226,6 +228,7 @@ function App() {
     setFileSystem(newFileSystem);
   };
 
+
   const renderFileSystem = (fs) => {
     const filteredItems = Object.keys(fs).filter((key) => {
       return key.toLowerCase().includes(searchQuery.toLowerCase());
@@ -261,6 +264,20 @@ function App() {
       }
     });
   };
+
+  const openModal = (type) => {
+    setModalType(type);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleAddItem = (itemName) => {
+    addNewItem(modalType === 'folder', itemName);
+    handleModalClose();
+  };
   
 
   return (
@@ -271,20 +288,20 @@ function App() {
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search files and folders"
       />
-      <input
-        type="text"
-        value={newItemName}
-        placeholder="New file or folder name"
-        onChange={(e) => setNewItemName(e.target.value)}
-      />
-      <button onClick={() => addNewItem(true)}>Add Folder</button>
-      <button onClick={() => addNewItem(false)}>Add File</button>
+      <button onClick={() => openModal('folder')}>Add Folder</button>
+      <button onClick={() => openModal('file')}>Add File</button>
       {clipboard && (
         <button onClick={() => pasteItem('')}>Paste into root</button>
       )}
       <div style={{ marginTop: '20px' }}>
         {renderFileSystem(fileSystem)}
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onAdd={handleAddItem}
+        placeholder={modalType === 'folder' ? 'Folder name' : 'File name'}
+      />
     </div>
   );
 }
