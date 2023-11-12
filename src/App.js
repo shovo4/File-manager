@@ -40,7 +40,7 @@ const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDel
               <button onClick={() => setIsEditing(true)}>Edit</button>
               <button onClick={() => setIsRenaming(true)}>Rename</button>
               <button onClick={() => onCopy(name)}>Copy</button>
-              <button onClick={() => onCut(name)}>Cut</button>
+              <button onClick={() => onCut(name, name)}>Cut</button>
               <button onClick={() => onDelete(name)}>Delete</button>
             </>
           )}
@@ -50,7 +50,7 @@ const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDel
   );
 };
 
-const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder }) => {
+const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder, onCut }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
   const [isAddingFile, setIsAddingFile] = useState(false);
@@ -91,6 +91,7 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
           <h2>{name}</h2>
           <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
           <button onClick={() => onDelete(name, true)}>Delete Folder</button>
+          <button onClick={() => onCut(name, name)}>Cut Folder</button> 
           <button onClick={() => onPaste(name)}>Paste Here</button>
           {children}
           {isAddingFile ? (
@@ -181,11 +182,13 @@ function App() {
   };
 
   const copyItem = (itemName) => {
-    setClipboard({ itemName, content: fileSystem[itemName], action: 'copy' });
+    const contentCopy = JSON.parse(JSON.stringify(fileSystem[itemName]));
+    setClipboard({ itemName, content: contentCopy, action: 'copy' });
   };
+  
 
-  const cutItem = (itemName) => {
-    setClipboard({ itemName, content: fileSystem[itemName], action: 'cut' });
+  const cutItem = (itemName, itemPath) => {
+    setClipboard({ itemName, itemPath, content: fileSystem[itemName], action: 'cut' });
   };
 
   const pasteItem = (targetFolderName) => {
@@ -226,6 +229,7 @@ function App() {
     const filteredItems = Object.keys(fs).filter((key) => {
       return key.toLowerCase().includes(searchQuery.toLowerCase());
     });
+
     return filteredItems.map((key) => {
       if (typeof fs[key] === 'object' && fs[key] !== null && !(fs[key] instanceof Array)) {
         return (
@@ -234,7 +238,8 @@ function App() {
             name={key}
             onDelete={() => deleteItem(key)}
             onPaste={() => pasteItem(key)}
-            onRename={(oldName, newName) => renameItem(oldName, newName)} // Pass onRename here
+            onRename={(oldName, newName) => renameItem(oldName, newName)}
+            onCut={cutItem}  // Passing onCut prop to FolderComponent
           >
             {renderFileSystem(fs[key])}
           </FolderComponent>
@@ -249,7 +254,7 @@ function App() {
             onRename={(oldName, newName) => renameItem(oldName, newName)}
             onDelete={() => deleteItem(key)}
             onCopy={() => copyItem(key)}
-            onCut={() => cutItem(key)}
+            onCut={cutItem}  // Passing onCut prop to FileComponent
           />
         );
       }

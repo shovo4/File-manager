@@ -1,21 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const FileComponent = ({
-  name,
-  content,
-  isFolder,
-  onContentSave,
-  onRename,
-  onDelete,
-  onCopy,
-  onCut,
-  onOptions,
-}) => {
+const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDelete, onCopy, onCut }) => {
   const [editContent, setEditContent] = useState(content);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(name);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
 
   const handleSave = () => {
     if (!isFolder) {
@@ -30,99 +19,116 @@ const FileComponent = ({
   };
 
   return (
-    <div
-      style={{ marginBottom: '20px', cursor: 'pointer' }}
-      onClick={() => setShowOptions(!showOptions)}
-    >
-      {showOptions ? (
+    <div style={{ marginBottom: '20px' }}>
+      {isRenaming ? (
         <>
-          {isRenaming ? (
+          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
+          <button onClick={handleRename}>Rename</button>
+          <button onClick={() => setIsRenaming(false)}>Cancel</button>
+        </>
+      ) : (
+        <>
+          <h3>{name}</h3>
+          {isEditing ? (
             <>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-              <button onClick={handleRename}>Rename</button>
-              <button onClick={() => setIsRenaming(false)}>Cancel</button>
+              <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+              <button onClick={handleSave}>Save</button>
+              <button onClick={() => setIsEditing(false)}>Cancel</button>
             </>
           ) : (
             <>
-              <h3>{name}</h3>
-              {isEditing ? (
-                <>
-                  <textarea
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                  />
-                  <button onClick={handleSave}>Save</button>
-                  <button onClick={() => setIsEditing(false)}>Cancel</button>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => setIsEditing(true)}>Edit</button>
-                  <button onClick={() => setIsRenaming(true)}>Rename</button>
-                  <button onClick={() => onCopy(name)}>Copy</button>
-                  <button onClick={() => onCut(name)}>Cut</button>
-                  <button onClick={() => onDelete(name)}>Delete</button>
-                </>
-              )}
+              <button onClick={() => setIsEditing(true)}>Edit</button>
+              <button onClick={() => setIsRenaming(true)}>Rename</button>
+              <button onClick={() => onCopy(name)}>Copy</button>
+              <button onClick={() => onCut(name)}>Cut</button>
+              <button onClick={() => onDelete(name)}>Delete</button>
             </>
           )}
         </>
-      ) : (
-        <h3>{name}</h3>
       )}
     </div>
   );
 };
 
-
-const FolderComponent = ({
-  name,
-  children,
-  onDelete,
-  onPaste,
-  onRename,
-  onOptions,
-}) => {
+const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
-  const [showOptions, setShowOptions] = useState(false);
+  const [isAddingFile, setIsAddingFile] = useState(false);
+  const [isAddingFolder, setIsAddingFolder] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
 
   const handleRename = () => {
-    onRename(name, newName);
+    onRename(name, newName, true); // true indicates it's a folder
     setIsRenaming(false);
   };
 
+  const handleAddFile = () => {
+    if (newItemName) {
+      onAddFile(name, newItemName);
+      setNewItemName('');
+      setIsAddingFile(false);
+    }
+  };
+
+  const handleAddFolder = () => {
+    if (newItemName) {
+      onAddFolder(name, newItemName);
+      setNewItemName('');
+      setIsAddingFolder(false);
+    }
+  };
+
   return (
-    <div
-      style={{ marginLeft: '20px', cursor: 'pointer' }}
-      onClick={() => setShowOptions(!showOptions)}
-    >
-      <h2>{name}</h2>
-      {showOptions && (
+    <div style={{ marginLeft: '20px' }}>
+      {isRenaming ? (
         <>
-          {isRenaming ? (
+          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
+          <button onClick={handleRename}>Rename</button>
+          <button onClick={() => setIsRenaming(false)}>Cancel</button>
+        </>
+      ) : (
+        <>
+          <h2>{name}</h2>
+          <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
+          <button onClick={() => onDelete(name, true)}>Delete Folder</button>
+          <button onClick={() => onPaste(name)}>Paste Here</button>
+          {children}
+          {isAddingFile ? (
             <>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-              <button onClick={handleRename}>Rename</button>
-              <button onClick={() => setIsRenaming(false)}>Cancel</button>
+              <input
+                type="text"
+                value={newItemName}
+                placeholder="New file name"
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+              <button onClick={handleAddFile}>Add File</button>
             </>
           ) : (
+            <button onClick={() => setIsAddingFile(true)}>Add File</button>
+          )}
+          {isAddingFolder ? (
             <>
-              <button onClick={() => onDelete(name)}>Delete Folder</button>
-              <button onClick={() => onPaste(name)}>Paste Here</button>
-              <button onClick={() => setIsRenaming(true)}>Rename</button>
-              {children}
+              <input
+                type="text"
+                value={newItemName}
+                placeholder="New folder name"
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+              <button onClick={handleAddFolder}>Add Folder</button>
             </>
+          ) : (
+            <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
           )}
         </>
       )}
     </div>
   );
 };
-
 function App() {
   const [fileSystem, setFileSystem] = useState(
-    JSON.parse(localStorage.getItem('fileSystem')) || {}
+    JSON.parse(localStorage.getItem('fileSystem')) || { root: { isFolder: true, children: {} } }
   );
+
   const [newItemName, setNewItemName] = useState('');
   const [clipboard, setClipboard] = useState(
     JSON.parse(localStorage.getItem('clipboard')) || null
@@ -215,7 +221,6 @@ function App() {
   
     setFileSystem(newFileSystem);
   };
-  
 
   const renderFileSystem = (fs) => {
     const filteredItems = Object.keys(fs).filter((key) => {
