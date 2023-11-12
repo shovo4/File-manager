@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDelete, onCopy, onCut }) => {
   const [editContent, setEditContent] = useState(content);
@@ -143,7 +144,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem('clipboard', JSON.stringify(clipboard));
   }, [clipboard]);
-
+  
   const addNewItem = (isFolder) => {
     const newFileSystem = { ...fileSystem };
     if (newFileSystem[newItemName]) {
