@@ -1,0 +1,22 @@
+const addNewItem = (isFolder, path = 'root') => {
+    const newItemName = prompt(`Enter name for the new ${isFolder ? 'folder' : 'file'}:`);
+    if (!newItemName) return;
+
+    setFileSystem(prev => {
+      const newFileSystem = { ...prev };
+      let current = newFileSystem;
+
+      path.split('/').forEach(part => {
+        if (!current[part]) current[part] = { isFolder: true, children: {} };
+        current = current[part].children;
+      });
+
+      if (current[newItemName]) {
+        alert('A file or folder with this name already exists.');
+        return { ...prev };
+      }
+
+      current[newItemName] = isFolder ? { isFolder: true, children: {} } : 'New content';
+      return newFileSystem;
+    });
+  };
