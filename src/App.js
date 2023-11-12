@@ -17,7 +17,7 @@ const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDel
 
   const handleRename = () => {
     onRename(name, newName);
-    setIsRenaming(false);w
+    setIsRenaming(false);
   };
 
   return (

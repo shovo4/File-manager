@@ -124,11 +124,11 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
     </div>
   );
 };
+
 function App() {
   const [fileSystem, setFileSystem] = useState(
-    JSON.parse(localStorage.getItem('fileSystem')) || { root: { isFolder: true, children: {} } }
+    JSON.parse(localStorage.getItem('fileSystem')) || {}
   );
-
   const [newItemName, setNewItemName] = useState('');
   const [clipboard, setClipboard] = useState(
     JSON.parse(localStorage.getItem('clipboard')) || null
@@ -143,14 +143,14 @@ function App() {
     localStorage.setItem('clipboard', JSON.stringify(clipboard));
   }, [clipboard]);
 
-  const addNewItem = (isFolder) => {
+  const addNewItem = (isFolder, parentFolderName) => { // Pass the parent folder name
     const newFileSystem = { ...fileSystem };
-    if (newFileSystem[newItemName]) {
+    if (newFileSystem[parentFolderName][newItemName]) {
       alert('A file or folder with this name already exists.');
       return;
     }
     const content = isFolder ? {} : 'New content';
-    newFileSystem[newItemName] = content;
+    newFileSystem[parentFolderName][newItemName] = content; // Use the parent folder name
     setFileSystem(newFileSystem);
     setNewItemName('');
   };
@@ -222,7 +222,7 @@ function App() {
     setFileSystem(newFileSystem);
   };
 
-  const renderFileSystem = (fs) => {
+  const renderFileSystem = (fs, parentFolderName = '') => { // Pass parent folder name
     const filteredItems = Object.keys(fs).filter((key) => {
       return key.toLowerCase().includes(searchQuery.toLowerCase());
     });
@@ -234,9 +234,11 @@ function App() {
             name={key}
             onDelete={() => deleteItem(key)}
             onPaste={() => pasteItem(key)}
-            onRename={(oldName, newName) => renameItem(oldName, newName)} // Pass onRename here
+            onRename={(oldName, newName) => renameItem(oldName, newName)}
+            onAddFile={(parentFolderName, newItemName) => addNewItem(false, parentFolderName)} // Add File inside folder
+            onAddFolder={(parentFolderName, newItemName) => addNewItem(true, parentFolderName)} // Add Folder inside folder
           >
-            {renderFileSystem(fs[key])}
+            {renderFileSystem(fs[key], key)}
           </FolderComponent>
         );
       } else {
@@ -255,7 +257,6 @@ function App() {
       }
     });
   };
-  
 
   return (
     <div>
