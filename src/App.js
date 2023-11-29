@@ -99,34 +99,40 @@ function App() {
   const pasteItem = (targetPath) => {
     if (!clipboard) return;
     const { path: sourcePath, itemName, content, action } = clipboard;
-    const targetRef = getItemRef(targetPath);
   
-    // Check if pasting in the same location
+    // Check if pasting into the same location for copy action
     if (JSON.stringify(targetPath) === JSON.stringify(sourcePath) && action === 'copy') {
       alert('Item already exists in this folder.');
       return;
     }
   
+    const targetRef = getItemRef(targetPath);
+  
     // Check if item with the same name exists in the target location
-    if (targetRef[itemName]) {
+    if (targetRef && targetRef[itemName]) {
       alert('An item with the same name already exists in the target folder.');
       return;
     }
   
     // Paste the item
-    targetRef[itemName] = content;
+    if (targetRef) {
+      targetRef[itemName] = content;
   
-    // If it's a cut operation, remove the item from the original location
-    if (action === 'cut') {
-      const sourceRef = getItemRef(sourcePath);
-      delete sourceRef[itemName];
-      setClipboard(null);
+      // If it's a cut operation, remove the item from the original location
+      if (action === 'cut') {
+        const sourceRef = getItemRef(sourcePath);
+        if (sourceRef && sourceRef[itemName]) {
+          delete sourceRef[itemName];
+        }
+        setClipboard(null);
+      }
+  
+      setFileSystem({ ...fileSystem });
+    } else {
+      alert('Invalid target path for pasting.');
     }
-  
-    setFileSystem({ ...fileSystem });
   };
   
-
   const renderFileSystem = (fs, path = []) => {
     const filteredItems = Object.keys(fs).filter((key) => {
       return key.toLowerCase().includes(searchQuery.toLowerCase());
