@@ -1,138 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Modal from './modal.js';
+import FileComponent from './components/File'; // Assuming FileComponent is in FileComponent.js
+import FolderComponent from './components/Folder'; // Assuming FolderComponent is in FolderComponent.js
 
-const FileComponent = ({ name, content, isFolder, onContentSave, onRename, onDelete, onCopy, onCut }) => {
-  const [editContent, setEditContent] = useState(content);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newName, setNewName] = useState(name);
-  const [isRenaming, setIsRenaming] = useState(false);
-
-  const handleSave = () => {
-    if (!isFolder) {
-      onContentSave(name, editContent);
-      setIsEditing(false);
-    }
-  };
-
-  const handleRename = () => {
-    onRename(name, newName);
-    setIsRenaming(false);
-  };
-
-  return (
-    <div style={{ marginBottom: '20px' }}>
-      {isRenaming ? (
-        <>
-          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <button onClick={handleRename}>Rename</button>
-          <button onClick={() => setIsRenaming(false)}>Cancel</button>
-        </>
-      ) : (
-        <>
-          <h3>{name}</h3>
-          {isEditing ? (
-            <>
-              <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
-              <button onClick={handleSave}>Save</button>
-              <button onClick={() => setIsEditing(false)}>Cancel</button>
-            </>
-          ) : (
-            <>
-              <button onClick={() => setIsEditing(true)}>Edit</button>
-              <button onClick={() => setIsRenaming(true)}>Rename</button>
-              <button onClick={() => onCopy(name)}>Copy</button>
-              <button onClick={() => onCut(name, name)}>Cut</button>
-              <button onClick={() => onDelete(name)}>Delete</button>
-            </>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
-
-const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder, onCut }) => {
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [newName, setNewName] = useState(name);
-  const [isAddingFile, setIsAddingFile] = useState(false);
-  const [isAddingFolder, setIsAddingFolder] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-
-  const handleRename = () => {
-    onRename(name, newName, true); // true indicates it's a folder
-    setIsRenaming(false);
-  };
-
-  const handleAddFile = () => {
-    if (newItemName) {
-      onAddFile(name, newItemName);
-      setNewItemName('');
-      setIsAddingFile(false);
-    }
-  };
-
-  const handleAddFolder = () => {
-    if (newItemName) {
-      onAddFolder(name, newItemName);
-      setNewItemName('');
-      setIsAddingFolder(false);
-    }
-  };
-
-  return (
-    <div style={{ marginLeft: '20px' }}>
-      {isRenaming ? (
-        <>
-          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <button onClick={handleRename}>Rename</button>
-          <button onClick={() => setIsRenaming(false)}>Cancel</button>
-        </>
-      ) : (
-        <>
-          <h2>{name}</h2>
-          <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
-          <button onClick={() => onDelete(name, true)}>Delete Folder</button>
-          <button onClick={() => onCut(name, name)}>Cut Folder</button> 
-          <button onClick={() => onPaste(name)}>Paste Here</button>
-          {isAddingFile ? (
-            <>
-              <input
-                type="text"
-                value={newItemName}
-                placeholder="New file name"
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <button onClick={handleAddFile}>Add File</button>
-            </>
-          ) : (
-            <button onClick={() => setIsAddingFile(true)}>Add File</button>
-          )}
-          {isAddingFolder ? (
-            <>
-              <input
-                type="text"
-                value={newItemName}
-                placeholder="New folder name"
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <button onClick={handleAddFolder}>Add Folder</button>
-            </>
-          ) : (
-            <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
-          )}
-          {children}
-        </>
-      )}
-    </div>
-  );
-};
 function App() {
   const [fileSystem, setFileSystem] = useState(
     JSON.parse(localStorage.getItem('fileSystem')) || { root: { isFolder: true, children: {} } }
   );
-
-  const [newItemName, setNewItemName] = useState('');
   const [clipboard, setClipboard] = useState(
     JSON.parse(localStorage.getItem('clipboard')) || null
   );
@@ -148,104 +23,102 @@ function App() {
     localStorage.setItem('clipboard', JSON.stringify(clipboard));
   }, [clipboard]);
 
-  const addNewItem = (isFolder, itemName) => {
-    const newFileSystem = { ...fileSystem };
-    if (newFileSystem[itemName]) {
+  const getItemRef = (path) => {
+    let ref = fileSystem.root.children;
+    path.forEach((p, index) => {
+      if (index < path.length - 1) {
+        ref = ref[p].children;
+      }
+    });
+    return ref;
+  };
+
+  const addNewItem = (path, isFolder, itemName) => {
+    const ref = getItemRef(path);
+    if (ref[itemName]) {
       alert('A file or folder with this name already exists.');
       return;
     }
-    const content = isFolder ? {} : 'New content';
-    newFileSystem[itemName] = content;
-    setFileSystem(newFileSystem);
+    ref[itemName] = isFolder ? { isFolder: true, children: {} } : 'New content';
+    setFileSystem({ ...fileSystem });
   };
 
-  const updateFileContent = (fileName, content) => {
-    const newFileSystem = { ...fileSystem };
-    newFileSystem[fileName] = content;
-    setFileSystem(newFileSystem);
+  const updateFileContent = (path, fileName, content) => {
+    const ref = getItemRef(path);
+    ref[fileName] = content;
+    setFileSystem({ ...fileSystem });
   };
 
-  const renameItem = (oldName, newName) => {
+  const renameItem = (path, oldName, newName) => {
     if (oldName !== newName) {
-      const newFileSystem = { ...fileSystem };
-      if (newFileSystem[newName]) {
+      const ref = getItemRef(path);
+      if (ref[newName]) {
         alert('A file or folder with the new name already exists.');
         return;
       }
-      newFileSystem[newName] = newFileSystem[oldName];
-      delete newFileSystem[oldName];
-      setFileSystem(newFileSystem);
+      ref[newName] = ref[oldName];
+      delete ref[oldName];
+      setFileSystem({ ...fileSystem });
     }
   };
 
-  const deleteItem = (itemName) => {
-    const newFileSystem = { ...fileSystem };
-    delete newFileSystem[itemName];
-    setFileSystem(newFileSystem);
+  const deleteItem = (path, itemName) => {
+    const ref = getItemRef(path);
+    delete ref[itemName];
+    setFileSystem({ ...fileSystem });
   };
 
-  const copyItem = (itemName) => {
-    const contentCopy = JSON.parse(JSON.stringify(fileSystem[itemName]));
-    setClipboard({ itemName, content: contentCopy, action: 'copy' });
-  };
-  
-
-  const cutItem = (itemName, itemPath) => {
-    setClipboard({ itemName, itemPath, content: fileSystem[itemName], action: 'cut' });
+  const copyItem = (path, itemName) => {
+    const ref = getItemRef(path);
+    setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'copy' });
   };
 
-  const pasteItem = (targetFolderName) => {
+  const cutItem = (path, itemName) => {
+    const ref = getItemRef(path);
+    setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'cut' });
+  };
+
+  const pasteItem = (targetPath) => {
     if (!clipboard) return;
-  
-    const { itemName, content, action } = clipboard;
-    const newFileSystem = { ...fileSystem };
-  
-    if (targetFolderName === '') {
-      // Paste into the root
-      if (newFileSystem[itemName]) {
-        alert('A file with the same name already exists in the root folder.');
-      } else {
-        newFileSystem[itemName] = content;
-      }
-    } else {
-      // Paste into a specific folder
-      if (newFileSystem[targetFolderName]) {
-        if (newFileSystem[targetFolderName][itemName]) {
-          alert('A file with the same name already exists in the target folder.');
-        } else {
-          newFileSystem[targetFolderName][itemName] = content;
-        }
-      } else {
-        newFileSystem[targetFolderName] = { [itemName]: content };
-      }
+    const { path, itemName, content, action } = clipboard;
+    if (JSON.stringify(targetPath) === JSON.stringify(path) && action === 'copy') {
+      alert('Item already exists in this folder.');
+      return;
     }
-  
-    // Remove from clipboard if it was a cut operation
+    const targetRef = getItemRef(targetPath);
+    if (targetRef[itemName] && action === 'copy') {
+      alert('A file with the same name already exists in the target folder.');
+      return;
+    }
+    targetRef[itemName] = content;
     if (action === 'cut') {
+      const sourceRef = getItemRef(path);
+      delete sourceRef[itemName];
       setClipboard(null);
     }
-  
-    setFileSystem(newFileSystem);
+    setFileSystem({ ...fileSystem });
   };
 
-
-  const renderFileSystem = (fs) => {
+  const renderFileSystem = (fs, path = []) => {
     const filteredItems = Object.keys(fs).filter((key) => {
       return key.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     return filteredItems.map((key) => {
-      if (typeof fs[key] === 'object' && fs[key] !== null && !(fs[key] instanceof Array)) {
+      const currentPath = [...path, key];
+      if (fs[key].isFolder) {
         return (
           <FolderComponent
             key={key}
             name={key}
-            onDelete={() => deleteItem(key)}
-            onPaste={() => pasteItem(key)}
-            onRename={(oldName, newName) => renameItem(oldName, newName)}
-            onCut={cutItem}  // Passing onCut prop to FolderComponent
+            onDelete={() => deleteItem(currentPath, key)}
+            onPaste={() => pasteItem(currentPath)}
+            onAddFile={(fileName) => addNewItem(currentPath, false, fileName)}
+            onAddFolder={(folderName) => addNewItem(currentPath, true, folderName)}
+            onRename={(oldName, newName) => renameItem(currentPath, oldName, newName)}
+            onCut={() => cutItem(currentPath, key)}
           >
-            {renderFileSystem(fs[key])}
+            {renderFileSystem(fs[key].children, currentPath)}
           </FolderComponent>
         );
       } else {
@@ -254,11 +127,11 @@ function App() {
             key={key}
             name={key}
             content={fs[key]}
-            onContentSave={(name, content) => updateFileContent(name, content)}
-            onRename={(oldName, newName) => renameItem(oldName, newName)}
-            onDelete={() => deleteItem(key)}
-            onCopy={() => copyItem(key)}
-            onCut={cutItem}  // Passing onCut prop to FileComponent
+            onContentSave={(name, content) => updateFileContent(currentPath, name, content)}
+            onRename={(oldName, newName) => renameItem(currentPath, oldName, newName)}
+            onDelete={() => deleteItem(currentPath, key)}
+            onCopy={() => copyItem(currentPath, key)}
+            onCut={() => cutItem(currentPath, key)}
           />
         );
       }
@@ -275,10 +148,9 @@ function App() {
   };
 
   const handleAddItem = (itemName) => {
-    addNewItem(modalType === 'folder', itemName);
+    addNewItem([], modalType === 'folder', itemName);
     handleModalClose();
   };
-  
 
   return (
     <div>
@@ -291,10 +163,10 @@ function App() {
       <button onClick={() => openModal('folder')}>Add Folder</button>
       <button onClick={() => openModal('file')}>Add File</button>
       {clipboard && (
-        <button onClick={() => pasteItem('')}>Paste into root</button>
+        <button onClick={() => pasteItem([])}>Paste into root</button>
       )}
       <div style={{ marginTop: '20px' }}>
-        {renderFileSystem(fileSystem)}
+        {renderFileSystem(fileSystem.root.children)}
       </div>
       <Modal
         isOpen={isModalOpen}
