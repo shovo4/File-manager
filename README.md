@@ -1,3 +1,26 @@
+# FIle Manager App React.js
+## Requirements:
+### File Operations:
+ - [x] When the user accesses for the first time, there will be a root folder. This folder cannot be copied, cut, or deleted, but it can be renamed.
+
+ - [x] Users can create new files or folders in any folder. The newly created txt, js, ts, and json files should have valid initial content, which is not limited (e.g., the initial content of a txt file can be set as "test"). The content of other new files is empty.
+
+ - [x] Users can delete files or folders.
+
+ - [x] Users can rename files or folders.
+
+ - [ ] Users can copy, cut, and paste files or folders.
+
+ - [x] The state of folders and files created by the user will be restored upon their next visit.
+
+ - [ ] Search feature with a search bar where users can search for files and folders by name.
+
+### File Browsing:
+ - [ ] Supports at least the following file types: txt, js, ts, json.
+txt, js, ts, json, and other text files can be directly viewed on the right side of the browser. If there's syntax highlighting, it's even better.
+
+ - [ ] Other files will not be displayed in the browser.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

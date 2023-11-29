@@ -95,7 +95,6 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
           <button onClick={() => onDelete(name, true)}>Delete Folder</button>
           <button onClick={() => onCut(name, name)}>Cut Folder</button> 
           <button onClick={() => onPaste(name)}>Paste Here</button>
-          {children}
           {isAddingFile ? (
             <>
               <input
@@ -122,6 +121,7 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
           ) : (
             <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
           )}
+          {children}
         </>
       )}
     </div>
