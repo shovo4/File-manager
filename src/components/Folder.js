@@ -1,4 +1,6 @@
 import React, { useState} from 'react';
+import './components.css';
+
 const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder, onCut }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
@@ -28,7 +30,8 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
   };
 
   return (
-    <div style={{ marginLeft: '20px' }}>
+    <div className="folder-component">
+            <span className="folder-icon"></span>
       {isRenaming ? (
         <>
           <input value={newName} onChange={(e) => setNewName(e.target.value)} />
@@ -70,7 +73,9 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
           ) : (
             <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
           )}
-          <div>{children}</div>
+          <div className="nested-folder">
+                {children}
+            </div>
         </>
       )}
     </div>

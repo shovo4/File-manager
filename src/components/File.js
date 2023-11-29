@@ -1,4 +1,5 @@
 import React, { useState} from 'react';
+import './components.css';
 
 const FileComponent = ({ name, content, onContentSave, onRename, onDelete, onCopy, onCut }) => {
   const [editContent, setEditContent] = useState(content);
@@ -17,7 +18,8 @@ const FileComponent = ({ name, content, onContentSave, onRename, onDelete, onCop
   };
 
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div className="file-component">
+        <span className="file-icon"></span>
       {isRenaming ? (
         <>
           <input value={newName} onChange={(e) => setNewName(e.target.value)} />
