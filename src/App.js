@@ -34,14 +34,31 @@ function App() {
   };
 
   const addNewItem = (path, isFolder, itemName) => {
-    const ref = getItemRef(path);
-    if (ref[itemName]) {
-      alert('A file or folder with this name already exists.');
-      return;
+    const newFileSystem = { ...fileSystem }; // Create a copy of the current state
+    let ref = newFileSystem.root.children;    // Start from the root
+
+    // Navigate to the correct folder
+    for (const p of path) {
+        if (!ref[p]) {
+            alert('Path not found');
+            return;
+        }
+        ref = ref[p].children;
     }
+
+    // Check if item already exists
+    if (ref[itemName]) {
+        alert('An item with this name already exists.');
+        return;
+    }
+
+    // Add new folder or file
     ref[itemName] = isFolder ? { isFolder: true, children: {} } : 'New content';
-    setFileSystem({ ...fileSystem });
-  };
+
+    // Update the state
+    setFileSystem(newFileSystem);
+};
+
 
   const updateFileContent = (path, fileName, content) => {
     const ref = getItemRef(path);
@@ -72,32 +89,43 @@ function App() {
     const ref = getItemRef(path);
     setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'copy' });
   };
-
+  
   const cutItem = (path, itemName) => {
     const ref = getItemRef(path);
     setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'cut' });
   };
+  
 
   const pasteItem = (targetPath) => {
     if (!clipboard) return;
-    const { path, itemName, content, action } = clipboard;
-    if (JSON.stringify(targetPath) === JSON.stringify(path) && action === 'copy') {
+    const { path: sourcePath, itemName, content, action } = clipboard;
+    const targetRef = getItemRef(targetPath);
+  
+    // Check if pasting in the same location
+    if (JSON.stringify(targetPath) === JSON.stringify(sourcePath) && action === 'copy') {
       alert('Item already exists in this folder.');
       return;
     }
-    const targetRef = getItemRef(targetPath);
-    if (targetRef[itemName] && action === 'copy') {
-      alert('A file with the same name already exists in the target folder.');
+  
+    // Check if item with the same name exists in the target location
+    if (targetRef[itemName]) {
+      alert('An item with the same name already exists in the target folder.');
       return;
     }
+  
+    // Paste the item
     targetRef[itemName] = content;
+  
+    // If it's a cut operation, remove the item from the original location
     if (action === 'cut') {
-      const sourceRef = getItemRef(path);
+      const sourceRef = getItemRef(sourcePath);
       delete sourceRef[itemName];
       setClipboard(null);
     }
+  
     setFileSystem({ ...fileSystem });
   };
+  
 
   const renderFileSystem = (fs, path = []) => {
     const filteredItems = Object.keys(fs).filter((key) => {
