@@ -9,17 +9,19 @@
 
  - [x] Users can rename files or folders.
 
- - [ ] Users can copy, cut, and paste files or folders.
+ - [x] Users can copy, cut, and paste files or folders.
 
  - [x] The state of folders and files created by the user will be restored upon their next visit.
 
  - [ ] Search feature with a search bar where users can search for files and folders by name.
 
+ - [ ] users can edit files and add information.
+
 ### File Browsing:
  - [ ] Supports at least the following file types: txt, js, ts, json.
 txt, js, ts, json, and other text files can be directly viewed on the right side of the browser. If there's syntax highlighting, it's even better.
 
- - [ ] Other files will not be displayed in the browser.
+ - [x] Other files will not be displayed in the browser.
 
 # Getting Started with Create React App
 
