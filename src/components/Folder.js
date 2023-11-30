@@ -31,53 +31,57 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
 
   return (
     <div className="folder-component">
-            <span className="folder-icon"></span>
-      {isRenaming ? (
-        <>
-          <input value={newName} onChange={(e) => setNewName(e.target.value)} />
-          <button onClick={handleRename}>Rename</button>
-          <button onClick={() => setIsRenaming(false)}>Cancel</button>
-        </>
-      ) : (
-        <>
-          <h2>{name}</h2>
-          <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
-          <button onClick={() => onDelete()}>Delete Folder</button>
-          <button onClick={() => onCut()}>Cut Folder</button>
-          <button onClick={() => onPaste()}>Paste Here</button>
-          {isAddingFile ? (
-            <>
-              <input
-                type="text"
-                value={newItemName}
-                placeholder="New file name"
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <button onClick={handleAddFile}>Add File</button>
-              <button onClick={() => setIsAddingFile(false)}>Cancel</button>
-            </>
-          ) : (
-            <button onClick={() => setIsAddingFile(true)}>Add File</button>
-          )}
-          {isAddingFolder ? (
-            <>
-              <input
-                type="text"
-                value={newItemName}
-                placeholder="New folder name"
-                onChange={(e) => setNewItemName(e.target.value)}
-              />
-              <button onClick={handleAddFolder}>Add Folder</button>
-              <button onClick={() => setIsAddingFolder(false)}>Cancel</button>
-            </>
-          ) : (
-            <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
-          )}
-          <div className="nested-folder">
+      <div className="name-and-icon">
+        <span className="folder-icon"></span>
+        <h2>{name}</h2>
+      </div>
+      <div className="folder-actions">
+        {isRenaming ? (
+          <>
+            <input value={newName} onChange={(e) => setNewName(e.target.value)} />
+            <button onClick={handleRename}>Rename</button>
+            <button onClick={() => setIsRenaming(false)}>Cancel</button>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
+            <button onClick={() => onDelete()}>Delete Folder</button>
+            <button onClick={() => onCut()}>Cut Folder</button>
+            <button onClick={() => onPaste()}>Paste Here</button>
+            {isAddingFile ? (
+              <>
+                <input
+                  type="text"
+                  value={newItemName}
+                  placeholder="New file name"
+                  onChange={(e) => setNewItemName(e.target.value)}
+                />
+                <button onClick={handleAddFile}>Add File</button>
+                <button onClick={() => setIsAddingFile(false)}>Cancel</button>
+              </>
+            ) : (
+              <button onClick={() => setIsAddingFile(true)}>Add File</button>
+            )}
+            {isAddingFolder ? (
+              <>
+                <input
+                  type="text"
+                  value={newItemName}
+                  placeholder="New folder name"
+                  onChange={(e) => setNewItemName(e.target.value)}
+                />
+                <button onClick={handleAddFolder}>Add Folder</button>
+                <button onClick={() => setIsAddingFolder(false)}>Cancel</button>
+              </>
+            ) : (
+              <button onClick={() => setIsAddingFolder(true)}>Add Folder</button>
+            )}
+          </>
+        )}
+      </div>
+      <div className="nested-folder">
                 {children}
             </div>
-        </>
-      )}
     </div>
   );
 };
