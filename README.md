@@ -1,7 +1,7 @@
 # FIle Manager App React.js
 
 ## Demo
-https://github.com/shovo4/File-manager/blob/main/file-manager-demo-lsqbxy59-2_VykyTnJ0.mp4
+file-manager-demo-lsqbxy59-2_VykyTnJ0.mp4
 
 ## Requirements:
 
