@@ -169,6 +169,7 @@ function App() {
             onAddFolder={(folderName) => addNewItem(currentPath, true, folderName)}
             onRename={(oldName, newName) => renameItem(currentPath, oldName, newName)}
             onCut={() => cutItem(currentPath, key)}
+            onCopy={() => copyItem(currentPath, key)}
           >
             {renderFileSystem(item.children, currentPath)}
           </FolderComponent>

@@ -1,7 +1,17 @@
 import React, { useState} from 'react';
 import './components.css';
 
-const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFile, onAddFolder, onCut }) => {
+const FolderComponent = ({
+  name,
+  children,
+  onDelete,
+  onRename,
+  onPaste,
+  onAddFile,
+  onAddFolder,
+  onCut,
+  onCopy // Added onCopy prop
+}) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
   const [isAddingFile, setIsAddingFile] = useState(false);
@@ -47,6 +57,7 @@ const FolderComponent = ({ name, children, onDelete, onRename, onPaste, onAddFil
             <button onClick={() => setIsRenaming(true)}>Rename Folder</button>
             <button onClick={() => onDelete()}>Delete Folder</button>
             <button onClick={() => onCut()}>Cut Folder</button>
+            <button onClick={() => onCopy()}>Copy Folder</button> {/* Added Copy button */}
             <button onClick={() => onPaste()}>Paste Here</button>
             {isAddingFile ? (
               <>
