@@ -40,7 +40,7 @@ const FileComponent = ({ name, content, onContentSave, onRename, onDelete, onCop
           </>
         ) : isEditing ? (
           <>
-            <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+            <textarea className="textarea-edit" value={editContent} onChange={(e) => setEditContent(e.target.value)}/>
             <button onClick={handleSave}>Save</button>
             <button onClick={() => setIsEditing(false)}>Cancel</button>
           </>
