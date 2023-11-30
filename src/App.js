@@ -23,6 +23,27 @@ function App() {
     localStorage.setItem('clipboard', JSON.stringify(clipboard));
   }, [clipboard]);
 
+  // Helper function to search within the file system recursively
+  const searchFileSystem = (fs, query) => {
+    return Object.keys(fs).reduce((acc, key) => {
+      const item = fs[key];
+      const lowerCaseQuery = query.toLowerCase();
+
+      // If it's a folder, recursively search its children
+      if (item.isFolder) {
+        const filteredChildren = searchFileSystem(item.children, query);
+        if (Object.keys(filteredChildren).length > 0 || key.toLowerCase().includes(lowerCaseQuery)) {
+          // If any children match, or the folder name matches, include the folder
+          acc[key] = { ...item, children: filteredChildren };
+        }
+      } else if (key.toLowerCase().includes(lowerCaseQuery)) {
+        // If it's a file and it matches the query, include the file
+        acc[key] = item;
+      }
+      return acc;
+    }, {});
+  };
+
   const getItemRef = (path) => {
     let ref = fileSystem.root.children;
     path.forEach((p, index) => {
@@ -134,13 +155,13 @@ function App() {
   };
   
   const renderFileSystem = (fs, path = []) => {
-    const filteredItems = Object.keys(fs).filter((key) => {
-      return key.toLowerCase().includes(searchQuery.toLowerCase());
-    });
+    const filteredFs = searchQuery ? searchFileSystem(fs, searchQuery) : fs;
 
-    return filteredItems.map((key) => {
+    return Object.keys(filteredFs).map((key) => {
       const currentPath = [...path, key];
-      if (fs[key].isFolder) {
+      const item = filteredFs[key];
+
+      if (item.isFolder) {
         return (
           <FolderComponent
             key={key}
@@ -152,7 +173,7 @@ function App() {
             onRename={(oldName, newName) => renameItem(currentPath, oldName, newName)}
             onCut={() => cutItem(currentPath, key)}
           >
-            {renderFileSystem(fs[key].children, currentPath)}
+            {renderFileSystem(item.children, currentPath)}
           </FolderComponent>
         );
       } else {
