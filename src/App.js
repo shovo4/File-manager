@@ -108,51 +108,48 @@ function App() {
 
   const copyItem = (path, itemName) => {
     const ref = getItemRef(path);
-    setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'copy' });
+    // Deep copy the item to preserve its structure and content
+    const itemCopy = JSON.parse(JSON.stringify(ref[itemName]));
+    setClipboard({ path, itemName, content: itemCopy, action: 'copy' });
   };
   
   const cutItem = (path, itemName) => {
     const ref = getItemRef(path);
-    setClipboard({ path, itemName, content: { ...ref[itemName] }, action: 'cut' });
+    // Copy the reference of the item for a cut operation
+    const itemCut = ref[itemName];
+    setClipboard({ path, itemName, content: itemCut, action: 'cut' });
   };
   
-
   const pasteItem = (targetPath) => {
     if (!clipboard) return;
     const { path: sourcePath, itemName, content, action } = clipboard;
-  
-    // Check if pasting into the same location for copy action
-    if (JSON.stringify(targetPath) === JSON.stringify(sourcePath) && action === 'copy') {
-      alert('Item already exists in this folder.');
-      return;
-    }
-  
+    
     const targetRef = getItemRef(targetPath);
-  
-    // Check if item with the same name exists in the target location
-    if (targetRef && targetRef[itemName]) {
+    
+    if (targetRef[itemName]) {
       alert('An item with the same name already exists in the target folder.');
       return;
     }
   
     // Paste the item
     if (targetRef) {
-      targetRef[itemName] = content;
-  
-      // If it's a cut operation, remove the item from the original location
       if (action === 'cut') {
+        // For a cut operation, move the item
+        targetRef[itemName] = content;
+        // Remove the item from the original location
         const sourceRef = getItemRef(sourcePath);
-        if (sourceRef && sourceRef[itemName]) {
-          delete sourceRef[itemName];
-        }
+        delete sourceRef[itemName];
         setClipboard(null);
+      } else {
+        // For a copy operation, create a deep copy of the item
+        targetRef[itemName] = JSON.parse(JSON.stringify(content));
       }
-  
       setFileSystem({ ...fileSystem });
     } else {
       alert('Invalid target path for pasting.');
     }
   };
+  
   
   const renderFileSystem = (fs, path = []) => {
     const filteredFs = searchQuery ? searchFileSystem(fs, searchQuery) : fs;

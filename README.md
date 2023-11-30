@@ -13,9 +13,9 @@
 
  - [x] The state of folders and files created by the user will be restored upon their next visit.
 
- - [ ] Search feature with a search bar where users can search for files and folders by name.
+ - [x] Search feature with a search bar where users can search for files and folders by name.
 
- - [ ] users can edit files and add information.
+ - [x] users can edit files and add information.
 
 ### File Browsing:
  - [ ] Supports at least the following file types: txt, js, ts, json.
