@@ -7,6 +7,14 @@ const FileComponent = ({ name, content, onContentSave, onRename, onDelete, onCop
   const [newName, setNewName] = useState(name);
   const [isRenaming, setIsRenaming] = useState(false);
 
+  // Function to get the file extension
+  const getFileExtension = (filename) => {
+    return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+  };
+
+  // Get the appropriate icon class based on the file extension
+  const fileExtension = getFileExtension(name).toLowerCase();
+  const iconClass = `file-icon ${fileExtension}`;
   const handleSave = () => {
     onContentSave(name, editContent);
     setIsEditing(false);
@@ -20,7 +28,7 @@ const FileComponent = ({ name, content, onContentSave, onRename, onDelete, onCop
   return (
     <div className="file-component">
       <div className="name-and-icon">
-        <span className="file-icon"></span>
+        <span className={iconClass}></span>
         <h3>{name}</h3>
       </div>
       <div className="file-actions">

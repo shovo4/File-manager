@@ -9,13 +9,30 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+
+.file-icon.txt {
+    background-image: url('./txt-icon.png');
+}
+
+.file-icon.js {
+    background-image: url('./js-icon.png');
+}
+
+.file-icon.ts {
+    background-image: url('./ts-icon.png');
+}
+
+.file-icon.json {
+    background-image: url('./json-icon.png');
+}
+
 /* Icons for folder and file */
 .folder-icon, .file-icon {
     display: inline-block;
     margin-right: 10px; /* Space between icon and text */
     vertical-align: middle; /* Align icon with text */
-    width: 24px; /* Width of the icon */
-    height: 24px; /* Height of the icon */
+    width: 50px; /* Width of the icon */
+    height: 50px; /* Height of the icon */
     background-size: cover; /* Resize the background image */
 }
 
