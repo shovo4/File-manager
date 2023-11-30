@@ -2,7 +2,8 @@
 
 ## Demo:
 
-https://github.com/shovo4/File-manager/assets/58551093/ea975c0a-9c80-4e08-aa42-a30bd0ff7570
+[File Manager Demo](https://github.com/shovo4/File-manager/assets/58551093/ea975c0a-9c80-4e08-aa42-a30bd0ff7570)
+
 
 
 
